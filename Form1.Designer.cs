@@ -8,7 +8,7 @@ namespace DownloadYTChannel
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
-        private System.Windows.Forms.Button buttonGenerateOnly;
+        private Button buttonGenerateOnly;
 
 
         /// <summary>
@@ -41,6 +41,7 @@ namespace DownloadYTChannel
             button1 = new Button();
             label2 = new Label();
             label3 = new Label();
+            checkBox1 = new CheckBox();
             SuspendLayout();
             // 
             // textBoxChannel
@@ -52,12 +53,12 @@ namespace DownloadYTChannel
             // 
             // textBoxOutput
             // 
-            textBoxOutput.Location = new Point(12, 43);
+            textBoxOutput.Location = new Point(12, 67);
             textBoxOutput.Multiline = true;
             textBoxOutput.Name = "textBoxOutput";
             textBoxOutput.ReadOnly = true;
             textBoxOutput.ScrollBars = ScrollBars.Vertical;
-            textBoxOutput.Size = new Size(590, 282);
+            textBoxOutput.Size = new Size(590, 258);
             textBoxOutput.TabIndex = 5;
             textBoxOutput.TextChanged += textBoxOutput_TextChanged;
             // 
@@ -115,9 +116,9 @@ namespace DownloadYTChannel
             label2.AutoSize = true;
             label2.Location = new Point(12, 330);
             label2.Name = "label2";
-            label2.Size = new Size(453, 15);
+            label2.Size = new Size(593, 15);
             label2.TabIndex = 6;
-            label2.Text = "yt-dlp for win7 is used. Included here. If it gets problems in the future, update it here:";
+            label2.Text = "yt-dlp for win7 is used. Included here. If it gets problems in the future, update it here. Just overwrite the .exe file:";
             label2.Click += label2_Click;
             // 
             // label3
@@ -131,9 +132,20 @@ namespace DownloadYTChannel
             label3.Text = "Download the latest yt-dlp_win7.exe on the right margin on the page (\"Releases\").";
             label3.Click += label3_Click;
             // 
+            // checkBox1
+            // 
+            checkBox1.AutoSize = true;
+            checkBox1.Location = new Point(12, 42);
+            checkBox1.Name = "checkBox1";
+            checkBox1.Size = new Size(560, 19);
+            checkBox1.TabIndex = 8;
+            checkBox1.Text = "Set maximum download speed (dangerous if your DSL is too fast, Youtube may think you are a robot)";
+            checkBox1.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             ClientSize = new Size(615, 370);
+            Controls.Add(checkBox1);
             Controls.Add(label3);
             Controls.Add(label2);
             Controls.Add(button1);
@@ -154,13 +166,14 @@ namespace DownloadYTChannel
 
         #endregion
 
-        private System.Windows.Forms.TextBox textBoxChannel;
-        private System.Windows.Forms.TextBox textBoxOutput;
-        private System.Windows.Forms.Button buttonStart;
-        private System.Windows.Forms.Button buttonClose;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
+        private TextBox textBoxChannel;
+        private TextBox textBoxOutput;
+        private Button buttonStart;
+        private Button buttonClose;
+        private Label label1;
+        private Button button1;
+        private Label label2;
+        private Label label3;
+        private CheckBox checkBox1;
     }
 }
