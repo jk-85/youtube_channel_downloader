@@ -1,22 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
+﻿using System.Diagnostics;
 using System.Management; // Add at the top with other using directives
-using System.Threading;
+using System.Text;
 using System.Text.RegularExpressions;
-using System.Net;
 
 namespace DownloadYTChannel
 {
     public partial class Form1 : Form
     {
         private Process ytDlpProcess;
-
+        public string limit_rate = "--limit-rate 5M";
         public Form1()
         {
             InitializeComponent();
@@ -57,6 +49,11 @@ namespace DownloadYTChannel
         private async void buttonStart_Click(object sender, EventArgs e)
         {
             string channel = textBoxChannel.Text.Trim();
+            if (checkBox1.Checked)
+            {
+                limit_rate = "";
+            }
+
             if (string.IsNullOrWhiteSpace(channel))
             {
                 MessageBox.Show("Please enter a YouTube channel.");
@@ -84,7 +81,7 @@ namespace DownloadYTChannel
             string folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, channel);
             Directory.CreateDirectory(folder);
 
-            string args = $"--write-description --write-info-json --write-thumbnail --embed-thumbnail --download-archive --merge-output-format mkv -P \"{folder}\" https://www.youtube.com/@{channel}";
+            string args = $"--write-description --write-info-json --write-thumbnail --embed-thumbnail --download-archive \"{folder}\\downloaded.txt\" --merge-output-format mkv --sleep-interval 1 --max-sleep-interval 2 --user-agent \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36\" -N 1 {limit_rate} -P \"{folder}\" https://www.youtube.com/@{channel}";
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
@@ -203,6 +200,13 @@ namespace DownloadYTChannel
 
                     string normalized = description.Replace("\\n", "\n");
                     string shortDesc = normalized.Replace("\\\"", "&quot;");
+
+                    // Assuming shortDesc contains your input string
+                    string pattern = @"(https?://[^\s""'<>]+)";
+                    string replacement = "<a href=\"$1\" target=\"_blank\">$1</a>";
+
+                    // Replace URLs in shortDesc with anchor tags
+                    shortDesc = Regex.Replace(shortDesc, pattern, replacement);
 
                     /*
                     // Step 1: Normalize line endings (optional if all are \n)
