@@ -2,6 +2,8 @@
 using System.Management; // Add at the top with other using directives
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Channels;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace DownloadYTChannel
 {
@@ -9,6 +11,8 @@ namespace DownloadYTChannel
     {
         private Process ytDlpProcess;
         public string limit_rate = "--limit-rate 5M";
+        private bool calledProgrammatically = false;
+
         public Form1()
         {
             InitializeComponent();
@@ -46,15 +50,49 @@ namespace DownloadYTChannel
             return children;
         }
 
+        private string cleanInput(string channel)
+        {
+            if (string.IsNullOrWhiteSpace(channel))
+                return string.Empty;
+
+            string input = channel.Trim();
+            string channelName;
+
+            // 1) Try to match “@username” in any URL or raw text
+            var atMatch = Regex.Match(input, @"@(?<user>[^\/\?\&]+)");
+            if (atMatch.Success)
+            {
+                channelName = atMatch.Groups["user"].Value;
+            }
+            else if (Uri.TryCreate(input, UriKind.Absolute, out var uri))
+            {
+                // 2) No @ — take the FIRST segment of the path
+                //    e.g. "/hanswelder/videos" -> ["hanswelder","videos"] -> "hanswelder"
+                var trimmedPath = uri.AbsolutePath.Trim('/');            // "hanswelder/videos" or "hanswelder"
+                var segments = trimmedPath.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+                channelName = segments.Length > 0
+                                  ? segments[0]
+                                  : string.Empty;
+            }
+            else
+            {
+                // 3) Not a URL at all — treat entire trimmed input as the username
+                channelName = input;
+            }
+
+            return channelName;
+        }
+
         private async void buttonStart_Click(object sender, EventArgs e)
         {
-            string channel = textBoxChannel.Text.Trim();
+            string channelname = cleanInput(textBoxChannel.Text.Trim());
+
             if (checkBox1.Checked)
             {
                 limit_rate = "";
             }
 
-            if (string.IsNullOrWhiteSpace(channel))
+            if (string.IsNullOrWhiteSpace(channelname))
             {
                 MessageBox.Show("Please enter a YouTube channel.");
                 return;
@@ -64,7 +102,7 @@ namespace DownloadYTChannel
             buttonClose.Enabled = false;
             textBoxOutput.Clear();
 
-            await Task.Run(() => RunDownloadAndGenerate(channel));
+            await Task.Run(() => RunDownloadAndGenerate(channelname));
 
             buttonStart.Enabled = true;
             buttonClose.Enabled = true;
@@ -358,7 +396,8 @@ namespace DownloadYTChannel
         }
         private async void buttonGenerateOnly_Click(object sender, EventArgs e)
         {
-            string channel = textBoxChannel.Text.Trim();
+            string channel = cleanInput(textBoxChannel.Text.Trim());
+
             if (string.IsNullOrWhiteSpace(channel))
             {
                 MessageBox.Show("Please enter a YouTube channel.");
@@ -430,7 +469,8 @@ namespace DownloadYTChannel
             }
             else
             {
-                textBoxOutput.AppendText("No download in progress.\r\n");
+                if (!calledProgrammatically)
+                    textBoxOutput.AppendText("No download in progress.\r\n");
             }
         }
 
@@ -459,6 +499,43 @@ namespace DownloadYTChannel
         private void textBoxOutput_TextChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private async void button2_Click(object sender, EventArgs e)
+        {
+            // Disable the entire form so nothing can be clicked
+            button2.Text = "Wait...";
+            this.Enabled = false;
+
+            calledProgrammatically = true;
+
+            button1_Click(this, EventArgs.Empty); // halt yt-dlp_win7
+
+            string url = "https://github.com/nicolaasjan/yt-dlp/releases/latest/download/yt-dlp_win7.exe";
+            string targetFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "yt-dlp_win7.exe");
+
+            try
+            {
+                using HttpClient client = new HttpClient();
+
+                // Download and overwrite existing file
+                using HttpResponseMessage response = await client.GetAsync(url);
+                response.EnsureSuccessStatusCode(); // throws if not success
+
+                using FileStream fs = new FileStream(targetFile, FileMode.Create, FileAccess.Write, FileShare.None);
+                await response.Content.CopyToAsync(fs);
+
+                MessageBox.Show("Download complete and file updated!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to download file:\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                this.Enabled = true;
+                button2.Text = "Update yt-dlp";
+            }
         }
     }
 }

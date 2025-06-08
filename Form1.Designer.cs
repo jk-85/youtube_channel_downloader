@@ -42,6 +42,8 @@ namespace DownloadYTChannel
             label2 = new Label();
             label3 = new Label();
             checkBox1 = new CheckBox();
+            label4 = new Label();
+            button2 = new Button();
             SuspendLayout();
             // 
             // textBoxChannel
@@ -142,9 +144,30 @@ namespace DownloadYTChannel
             checkBox1.Text = "Set maximum download speed (dangerous if your DSL is too fast, Youtube may think you are a robot)";
             checkBox1.UseVisualStyleBackColor = true;
             // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new Point(12, 373);
+            label4.Name = "label4";
+            label4.Size = new Size(134, 15);
+            label4.TabIndex = 9;
+            label4.Text = "Or just press the button:";
+            // 
+            // button2
+            // 
+            button2.Location = new Point(149, 368);
+            button2.Name = "button2";
+            button2.Size = new Size(95, 25);
+            button2.TabIndex = 10;
+            button2.Text = "Update yt-dlp";
+            button2.UseVisualStyleBackColor = true;
+            button2.Click += button2_Click;
+            // 
             // Form1
             // 
-            ClientSize = new Size(615, 370);
+            ClientSize = new Size(615, 405);
+            Controls.Add(button2);
+            Controls.Add(label4);
             Controls.Add(checkBox1);
             Controls.Add(label3);
             Controls.Add(label2);
@@ -175,5 +198,7 @@ namespace DownloadYTChannel
         private Label label2;
         private Label label3;
         private CheckBox checkBox1;
+        private Label label4;
+        private Button button2;
     }
 }
